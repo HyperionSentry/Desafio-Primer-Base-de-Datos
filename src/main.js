@@ -1,5 +1,3 @@
-const { sqliteOptions } = require('../sqlite');
-const { mariaDBOptions } = require('../mariaDB');
 
 const express = require('express')
 const path = require('path')
@@ -8,8 +6,8 @@ const publicPath = path.resolve(__dirname, '../public');
 const http = require('http');
 const io = require('socket.io');
 
-const products_api = require('../api/products_api.js')
-const messages_api = require('../api/messages_api.js')
+const products_api = require('../api/productos-test.js')
+//const messages_api = require('../api/messages_api.js')
 
 //--------------------------------------------
 // instancio servidor, socket y api
@@ -19,8 +17,10 @@ const app = express()
 const myServer = http.Server(app);
 const myWSServer = io(myServer);
 
-const productosApi = new products_api(mariaDBOptions, 'Products')
-const mensajesApi = new messages_api(sqliteOptions, 'Messages')
+//const productosApi = new products_api(mariaDBOptions, 'Products')
+//const mensajesApi = new messages_api(sqliteOptions, 'Messages')
+
+const productosApi = new products_api()
 
 //--------------------------------------------
 // configuro el socket
@@ -31,22 +31,22 @@ myWSServer.on('connection', async socket => {
     // carga inicial de productos
     socket.emit('products', productosApi.listarAll());
 
-    // actualizacion de productos
-    socket.on('update', producto => {
-        productosApi.guardar(producto)
-        myWSServer.sockets.emit('products', productosApi.listarAll());
-    })
+//     // actualizacion de productos
+//     socket.on('update', producto => {
+//         productosApi.guardar(producto)
+//         myWSServer.sockets.emit('products', productosApi.listarAll());
+//     })
 
-    // carga inicial de mensajes
-    socket.emit('messages', await mensajesApi.listarAll());
+//     // carga inicial de mensajes
+//     socket.emit('messages', await mensajesApi.listarAll());
 
-    // actualizacion de mensajes
-    socket.on('newMessage', async mensaje => {
-        mensaje.fyh = new Date().toLocaleString()
-        await mensajesApi.guardar(mensaje)
-        myWSServer.sockets.emit('messages', await mensajesApi.listarAll());
-    })
-});
+//     // actualizacion de mensajes
+//     socket.on('newMessage', async mensaje => {
+//         mensaje.fyh = new Date().toLocaleString()
+//         await mensajesApi.guardar(mensaje)
+//         myWSServer.sockets.emit('messages', await mensajesApi.listarAll());
+//     })
+ });
 
 
 // Se agrega lo sig para poder trabajar correctamente con lo que nos envian en el body de un POST o PUT
@@ -60,4 +60,5 @@ const puerto = 8080
 const server = myServer.listen(puerto, () => {
     console.log('Server arriba en puerto', puerto)
 })
+
 server.on('error', error => console.log(`Error en servidor ${error}`))
